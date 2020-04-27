@@ -14,10 +14,22 @@ class Level2 extends Phaser.Scene {
         this.load.image("score", "assets/img/Score.png")
         this.load.image("ground", "assets/img/ground.png");
         this.load.image("ball", "assets/img/ball.png");
+        this.load.image("stars", "assets/img/stars.png");
+        this.load.image("congrate", "assets/img/congratulation.png");
     }
 
     // method to be executed once the scene has been created
     create() {
+
+        this.hitCount = -1;
+        this.nextPlatform = 1;
+        this.currentPlatform = 0;
+        this.iscompleted = false;
+        this.gotoNextLevel = false;
+        this.isShowPass = true;
+        this.isCorrectJump = false;
+        this.arr = [];
+
         //background
         this.image = this.add.image(game.config.width / 2, game.config.height / 2, 'playBG');
         this.image.displayHeight = game.config.height;
@@ -62,18 +74,33 @@ class Level2 extends Phaser.Scene {
         }
 
         this.input.keyboard.on('keydown', function (e) {
-            console.log(e)
+           // console.log(e)
             if (e.key == "Enter") {
+                if(this.iscompleted == true){
+                    if(this.gotoNextLevel == true){
+                        this.scene.start("Level3")
+                    }else {
+                        this.gotoNextLevel = true;
+
+                        this.nextLevel = this.add.image(game.config.width / 2, game.config.height / 4 * 3, 'score');
+                        this.nextLevel.displayHeight =  game.config.height / 10;
+                        this.nextLevel.displayWidth = game.config.width / 2.4;
+                        this.nextLevelText = this.add.text(game.config.width / 2, game.config.height / 4 * 3, 'Next Level', { fontSize: '50px', fill: '#FFF' }).setOrigin(0.5);
+                    }
+                }else {
+                    this.movePlatforms();
+                }
                 //console.log("soft right key");
-                this.movePlatforms();
+
             }
         }, this);
 
         this.input.keyboard.on('keyup', function (e) {
-            console.log(e)
+           // console.log(e)
             if (e.key == "Enter") {
                 //console.log("soft right key");
-                this.stopPlatforms()
+                this.stopPlatforms();
+                this.hitCount = 0;
             }
         }, this);
 
@@ -104,25 +131,66 @@ class Level2 extends Phaser.Scene {
         return rightmostPlatform;
     }
     update() {
-        this.physics.world.collide(this.platformGroup, this.ball);
-        this.platformGroup.getChildren().forEach(function (platform) {
-            if (platform.getBounds().right < 0) {
-                this.updateScore(1);
-                platform.x = this.getRightmostPlatform() + Phaser.Math.Between(gameOptions.platformDistanceRange[0], gameOptions.platformDistanceRange[1]);
-                platform.displayWidth = Phaser.Math.Between(gameOptions.platformLengthRange[0], gameOptions.platformLengthRange[1]);
+        this.physics.world.collide(this.platformGroup, this.ball, null, function () {
+            if(this.hitCount == 0){
+
+                this.platformGroup.getChildren().forEach(function (platform) {
+                    if (platform.getBounds().right < 0) {
+                        this.isCorrectJump = true;
+                        platform.x = this.getRightmostPlatform() + Phaser.Math.Between(gameOptions.platformDistanceRange[0], gameOptions.platformDistanceRange[1]);
+                        platform.displayWidth = Phaser.Math.Between(gameOptions.platformLengthRange[0], gameOptions.platformLengthRange[1]);
+                        this.arr.push(platform);
+                        console.log(this.arr[1])
+
+                    }
+                }, this);
+                if(this.isCorrectJump == true){
+                    this.isBallHitPlatform();
+                }
+                this.checkGameWin();
             }
-        }, this);
+        },this);
 
-        if(this.score > 20){
-            this.scene.start("Level3")
-        }
+        this.checkGameOver();
 
+    }
+
+    checkGameOver(){
         if (this.ball.y > game.config.height) {
-            // localStorage.setItem(gameOptions.localStorageName, Math.max(this.score, this.topScore));
-            // this.scene.start("Level1");
             this.performGameOver()
         }
     }
+
+    checkGameWin(){
+        if(this.score >= 10  && this.isShowPass == true){
+            this.congrate = this.add.image(game.config.width / 2, game.config.height / 4, 'congrate');
+            this.congrate.displayHeight = game.config.height/4;
+            this.congrate.displayWidth = game.config.width/2;
+
+            this.stars = this.add.image(game.config.width / 2, game.config.height / 2, 'stars');
+            this.stars.displayHeight = game.config.height/4;
+            this.stars.displayWidth = game.config.width/2;
+
+            score = this.score;
+
+            this.iscompleted = true;
+            this.isShowPass = false;
+            //this.scene.start("Level2")
+        }
+    }
+
+    isBallHitPlatform() {
+        if(this.hitCount == 0){
+            if(this.iscompleted == false){
+                this.updateScore(1);
+            }
+            this.arr = this.platformGroup.getChildren();
+            this.isCorrectJump = false;
+            this.nextPlatform ++;
+            this.hitCount ++;
+        }
+    }
+
     performGameOver(){
         score = this.score;
         localStorage.setItem(gameOptions.localStorageName, Math.max(this.score, this.topScore));

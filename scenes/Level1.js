@@ -11,17 +11,20 @@ class Level1 extends Phaser.Scene {
         this.load.image("score", "assets/img/Score.png")
         this.load.image("ground", "assets/img/ground.png");
         this.load.image("ball", "assets/img/ball.png");
-        this.load.image("stars", "assets/img/stars.png")
-        this.load.image("congrate", "assets/img/congratulation.png")
+        this.load.image("stars", "assets/img/stars.png");
+        this.load.image("congrate", "assets/img/congratulation.png");
     }
 
     create() {
         //background
-        this.hitCount = 0;
+        this.hitCount = -1;
         this.nextPlatform = 1;
+        this.currentPlatform = 0;
         this.iscompleted = false;
         this.gotoNextLevel = false;
         this.isShowPass = true;
+        this.isCorrectJump = false;
+        this.arr = [];
 
         this.image = this.add.image(game.config.width / 2, game.config.height / 2, 'playBG');
         this.image.displayHeight = game.config.height;
@@ -100,7 +103,8 @@ class Level1 extends Phaser.Scene {
         this.score = 0;
         this.topScore = localStorage.getItem(gameOptions.localStorageName) == null ? 0 : localStorage.getItem(gameOptions.localStorageName);
         this.scoreText = this.add.text(game.config.width / 16, game.config.height / 25, 'SCORE:0', { fontSize: '70px', fill: '#FFF' });
-        this.updateScore(this.score);
+      //  this.updateScore(this.score);
+        this.arr = this.platformGroup.getChildren()
     }
     updateScore(inc) {
         this.score += inc;
@@ -121,44 +125,52 @@ class Level1 extends Phaser.Scene {
         return rightmostPlatform;
     }
     update() {
-        // this.physics.world.collide(this.platformGroup, this.ball);
-        // this.platformGroup.getChildren().forEach(function (platform) {
-        //     if (platform.getBounds().right < 0) {
-        //         this.updateScore(1);
-        //         platform.x = this.getRightmostPlatform() + Phaser.Math.Between(gameOptions.platformDistanceRange[0], gameOptions.platformDistanceRange[1]);
-        //         platform.displayWidth = Phaser.Math.Between(gameOptions.platformLengthRange[0], gameOptions.platformLengthRange[1]);
-        //     }
-        // }, this);
-        var collider = this.physics.add.collider(this.platformGroup, this.ball, null, function ()
-        {
-            this.physics.world.removeCollider(collider);
 
-            // call this when ball hit the platform
-            this.isBallHitPlatform()
-        }, this);
+        this.physics.world.collide(this.platformGroup, this.ball, null, function () {
+            if(this.hitCount == 0){
 
-        if(this.score >= 5  && this.isShowPass == true){
-            //console.log("==============>level 1 score: "+ this.score)
+                this.platformGroup.getChildren().forEach(function (platform) {
+                    if (platform.getBounds().right < 0) {
+                        this.isCorrectJump = true;
+                        platform.x = this.getRightmostPlatform() + Phaser.Math.Between(gameOptions.platformDistanceRange[0], gameOptions.platformDistanceRange[1]);
+                        platform.displayWidth = Phaser.Math.Between(gameOptions.platformLengthRange[0], gameOptions.platformLengthRange[1]);
+                        this.arr.push(platform);
+                        console.log(this.arr[1])
 
-            this.congrate = this.add.image(game.config.width / 2, game.config.height / 4, 'congrate');
-            this.congrate.displayHeight = game.config.height/4;
-            this.congrate.displayWidth = game.config.width/2;
+                    }
+                }, this);
+                if(this.isCorrectJump == true){
+                    this.isBallHitPlatform();
+                }
+                this.checkGameWin();
+            }
+        },this);
 
-            this.stars = this.add.image(game.config.width / 2, game.config.height / 2, 'stars');
-            this.stars.displayHeight = game.config.height/4;
-            this.stars.displayWidth = game.config.width/2;
+        this.checkGameOver();
 
-            score = this.score;
+    }
 
-            this.iscompleted = true;
-            this.isShowPass = false;
-            //this.scene.start("Level2")
-        }
-
+    checkGameOver(){
         if (this.ball.y > game.config.height) {
-            // localStorage.setItem(gameOptions.localStorageName, Math.max(this.score, this.topScore));
-            // this.scene.start("Level1");
             this.performGameOver()
+        }
+    }
+
+    checkGameWin(){
+        if(this.score >= 5  && this.isShowPass == true){
+                this.congrate = this.add.image(game.config.width / 2, game.config.height / 4, 'congrate');
+                this.congrate.displayHeight = game.config.height/4;
+                this.congrate.displayWidth = game.config.width/2;
+
+                this.stars = this.add.image(game.config.width / 2, game.config.height / 2, 'stars');
+                this.stars.displayHeight = game.config.height/4;
+                this.stars.displayWidth = game.config.width/2;
+
+                score = this.score;
+
+                this.iscompleted = true;
+                this.isShowPass = false;
+                //this.scene.start("Level2")
         }
     }
 
@@ -167,20 +179,11 @@ class Level1 extends Phaser.Scene {
             if(this.iscompleted == false){
                 this.updateScore(1);
             }
-
-           // this.arr = this.platformGroup.getChildren()
-            this.platformGroup.getChildren().forEach(function (platform) {
-                if (platform.getBounds().right < 0) {
-                    platform.x = this.getRightmostPlatform() + Phaser.Math.Between(gameOptions.platformDistanceRange[0], gameOptions.platformDistanceRange[1]);
-                    platform.displayWidth = Phaser.Math.Between(gameOptions.platformLengthRange[0], gameOptions.platformLengthRange[1]);
-                   // this.arr.push(platform);
-                }
-            }, this);
+            this.arr = this.platformGroup.getChildren()
+            this.isCorrectJump = false;
             this.nextPlatform ++;
+            this.hitCount ++;
         }
-
-        this.hitCount ++;
-
     }
 
     performGameOver(){
