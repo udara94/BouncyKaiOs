@@ -8,8 +8,10 @@ var gameOptions = {
 
     bounceHeight: 300,
     ballGravity: 1200,
+    gravityLevel2:2400,
     ballPosition: 0.2,
     platformSpeed: 650,
+    platformSpeedLevel2: 900,
     platformDistanceRange: [250, 450],
     platformHeightRange: [-50, 50],
     platformLengthRange: [120, 150],
