@@ -13,6 +13,7 @@ var gameOptions = {
     platformSpeed: 650,
     platformSpeedLevel2: 900,
     platformDistanceRange: [250, 450],
+    platformDistanceRangeLevel3: [450, 600],
     platformHeightRange: [-50, 50],
     platformLengthRange: [120, 150],
     localStorageName: "bestballscore3",
