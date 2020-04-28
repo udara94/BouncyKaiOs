@@ -235,7 +235,7 @@ class Level3 extends Phaser.Scene {
         this.tween = this.tweens.add({
             targets: platform,
             x: 600,
-            ease: 'Power2',
+            ease: 'Linear',
             duration: 1000,
             yoyo: true,
             repeat: -1,
