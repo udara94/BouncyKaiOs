@@ -17,6 +17,7 @@ var gameOptions = {
     platformHeightRange: [-50, 50],
     platformLengthRange: [120, 150],
     localStorageName: "bestballscore3",
+    currentLevel: "currentlevel",
 
     // target rotation speed, in degrees per frame
     rotationSpeed: 3,
