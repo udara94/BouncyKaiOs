@@ -162,7 +162,7 @@ class Level2 extends Phaser.Scene {
     }
 
     checkGameWin(){
-        if(this.score >= 10  && this.isShowPass == true){
+        if(this.score >= 3  && this.isShowPass == true){
             this.congrate = this.add.image(game.config.width / 2, game.config.height / 4, 'congrate');
             this.congrate.displayHeight = game.config.height/4;
             this.congrate.displayWidth = game.config.width/2;
